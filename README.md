@@ -15,11 +15,14 @@ This is a work in progress, if you find a mistake, please [file an issue](https:
 * The [sample code](https://github.com/googlecodelabs/your-first-pwapp/archive/master.zip)
 * A text editor
 * Basic knowledge of HTML, CSS and JavaScript
-* (Optional) Node is required in the last step to deploy to Firebase
+* NodeJs v10.x+
+* An [OpenWeatherMaps](https://openweathermap.org) API key
 
 ## Server
 ### Install
-1) npm install
+1) `npm install`
+2) `cp .env .env.example`
+3) Fill in the .env file
 
 ### Usage
-1) npm run dev
+1) `npm run dev`
