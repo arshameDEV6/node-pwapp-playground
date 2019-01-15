@@ -392,7 +392,14 @@ function initApp(apiKey) {
             {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
         ];
         app.saveSelectedCities();
+        app.selectedCities.forEach(function (city) {
+            app.getForecast(city.key, city.label);
+        });
     }
 
-    // TODO add service worker code here
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register('../service-worker.js')
+            .then(function() { console.log('Service Worker Registered'); });
+    }
 };
