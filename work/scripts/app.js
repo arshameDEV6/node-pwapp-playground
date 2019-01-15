@@ -291,15 +291,15 @@ function initApp(apiKey) {
                 condition: {
                     text: "Windy",
                     date: "Thu, 21 Jul 2016 09:00 PM EDT",
-                    temp: 56,
-                    code: 24
+                    temp: 13,
+                    code: 803
                 },
                 forecast: [
-                    {code: 801, high: 86, low: 70},
-                    {code: 801, high: 94, low: 73},
-                    {code: 200, high: 95, low: 78},
-                    {code: 803, high: 75, low: 89},
-                    {code: 803, high: 89, low: 77}
+                    {code: 801, high: 30, low: 21},
+                    {code: 801, high: 34, low: 22},
+                    {code: 200, high: 35, low: 26},
+                    {code: 803, high: 24, low: 32},
+                    {code: 803, high: 32, low: 25}
                 ]
             },
             atmosphere: {
@@ -329,7 +329,7 @@ function initApp(apiKey) {
             tomorrow = response.list[0],
             condition = {
                 text: tomorrow.weather[0].main,
-                date: tomorrow.dt_txt,
+                date: new Date(tomorrow.dt_txt).toString(),
                 temp: tomorrow.main.temp,
                 code: tomorrow.weather[0].id
             },
@@ -362,7 +362,6 @@ function initApp(apiKey) {
                 }
             }
         }
-
     }
 
     /************************************************************************
