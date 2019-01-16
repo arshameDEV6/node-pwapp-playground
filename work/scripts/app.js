@@ -168,18 +168,18 @@ function initApp(apiKey) {
      */
     app.getForecast = function (key, label) {
         var url = `https://api.openweathermap.org/data/2.5/forecast?units=metric&mode=json&id=${key}&appid=${app.apiKey}`;
-        // TODO add cache logic here
+        console.log('Start getForcast', url);
+        console.log(new Date().toLocaleTimeString(), new Date().getMilliseconds());
+        getCachedUrl(url, key, label);
 
         // Fetch the latest data.
         var request = new XMLHttpRequest();
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
                 if (request.status === 200) {
-                    var results = parseResponse(request.response);
-                    results.key = key;
-                    results.label = label;
-                    results.created = new Date().toISOString();
-                    app.updateForecastCard(results);
+                    console.log('HTTP Request', url);
+                    console.log(new Date().toLocaleTimeString(), new Date().getMilliseconds());
+                    processAndUpdateForecastData(request.response, key, label);
                 }
             } else {
                 // Return the initial weather forecast since no data is available.
@@ -324,8 +324,12 @@ function initApp(apiKey) {
     // Return object for updateForecastCard to consume
     function parseResponse(apiResponse) {
 
+        var response = apiResponse;
+        if (typeof response === 'string') {
+            response = JSON.parse(response);
+        }
+
         var
-            response = JSON.parse(apiResponse),
             tomorrow = response.list[0],
             condition = {
                 text: tomorrow.weather[0].main,
@@ -342,8 +346,13 @@ function initApp(apiKey) {
             },
             forecast = [];
 
+        // Since our data is broken up by 3 hour chunks
         // Start at 7th index to skip the 0th index (tomorrow) which we already parsed
         for (var i = 7; i < response.list.length; i += 8) {
+
+            // If we want to keep track of the day's high, and low properly this method should be updated
+            // Currently we only look at one 3 hour period making the highs and lows inaccurate
+
             forecast.push({
                 code: response.list[i].weather[0].id,
                 high: response.list[i].main.temp_max,
@@ -361,6 +370,33 @@ function initApp(apiKey) {
                     forecast
                 }
             }
+        }
+    }
+
+    function processAndUpdateForecastData(response, key, label) {
+        var results = parseResponse(response);
+        results.key = key;
+        results.label = label;
+        results.created = new Date().toISOString();
+        app.updateForecastCard(results);
+    }
+
+    function getCachedUrl(url, key, label) {
+        if ('caches' in window) {
+            /*
+             * Check if the service worker has already cached this city's weather
+             * data. If the service worker has the data, then display the cached
+             * data while the app fetches the latest data.
+             */
+            caches.match(url).then(function (response) {
+                if (response) {
+                    response.json().then(function updateFromCache(json) {
+                        console.log('ServiceWorker Response', url);
+                        console.log(new Date().toLocaleTimeString(), new Date().getMilliseconds());
+                        processAndUpdateForecastData(json, key, label);
+                    });
+                }
+            });
         }
     }
 
@@ -400,6 +436,8 @@ function initApp(apiKey) {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
             .register('../service-worker.js')
-            .then(function() { console.log('Service Worker Registered'); });
+            .then(function () {
+                console.log('Service Worker Registered');
+            });
     }
 };
